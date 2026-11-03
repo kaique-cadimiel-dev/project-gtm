@@ -40,3 +40,4 @@ Veja a lista de eventos e o checklist de exercícios na página **Exercícios**.
 
 > Tudo é simulado: pedidos, pagamentos e login ficam só no `localStorage` do navegador.
 # project-gtm
+# project-gtm
