@@ -1,7 +1,9 @@
-# GTM Lab Store
+# GTM Lab Store — cenário limpo
 
-Loja fictícia (HTML + CSS + JS puro, sem build) para praticar **Google Tag Manager** com **GA4** e **Google Ads**.
-O GTM vem **desligado**: nada é carregado até você informar um ID de container.
+Loja fictícia (HTML + CSS + JS puro, sem build) **sem nenhum rastreamento**: não há GTM, `dataLayer.push`, Consent Mode nem tags.
+A ideia é você implementar tudo e praticar Google Tag Manager com GA4 e Google Ads.
+
+A versão completa (com tudo implementado) está em `../referencia-completa/`, para consulta.
 
 ## Rodar localmente
 
@@ -10,36 +12,28 @@ python3 -m http.server 8000   # ou: npx serve .
 # abra http://localhost:8000
 ```
 
-## Ativar o GTM
+## O que fazer
 
-- Pela página **Exercícios** (campo "Ativar o GTM"), ou
-- abrindo qualquer página com `?gtm_id=GTM-XXXXXXX` (`?gtm_id=clear` remove), ou
-- fixando em `assets/js/config.js` (`GTM_ID`).
+1. Cole o snippet do GTM nos comentários `<!-- GTM: ... -->` do `<head>` e do `<body>` das 9 páginas.
+2. Implemente os `dataLayer.push()` em `assets/js/pages/*.js` (e, se quiser, em `assets/js/app.js`).
+3. Siga o checklist e o plano de medição na página **Exercícios**.
 
-## Hospedagem gratuita
-
-Qualquer host estático serve (a pasta raiz é o site):
-
-- **GitHub Pages**: suba o repositório → Settings → Pages → branch `main`, pasta `/ (root)`.
-- **Cloudflare Pages / Netlify / Vercel**: conecte o repositório, sem comando de build, diretório de saída `.`.
-- Netlify Drop / Vercel Drop: arraste a pasta.
+O painel **📊 dataLayer** (canto inferior direito) mostra tudo que passar pelo `window.dataLayer`.
 
 ## Estrutura
 
 ```
 index.html produtos.html produto.html carrinho.html checkout.html
 obrigado.html contato.html conta.html exercicios.html
-assets/js/tracking-init.js   dataLayer + Consent Mode v2 + UTMs + snippet do GTM
-assets/js/app.js             carrinho, consentimento, painel de debug, helpers GA4
-assets/js/products.js        catálogo
-assets/js/pages/*.js         lógica de cada página (eventos)
+assets/js/app.js         carrinho, usuário, cabeçalho/rodapé, banner de cookies (só UI), painel dataLayer
+assets/js/products.js    catálogo
+assets/js/pages/*.js     lógica de cada página
 ```
 
-O painel **📊 dataLayer** (canto inferior direito) mostra cada push em tempo real, mesmo sem GTM.
-Veja a lista de eventos e o checklist de exercícios na página **Exercícios**.
+Os elementos têm `id`, `class` e `data-*` (ex.: `data-item-id`, `data-price`, `data-gtm`) para praticar seletores e variáveis de DOM.
+
+## Hospedagem gratuita
+
+GitHub Pages: Settings → Pages → branch `main`, pasta `/ (root)`. Também funciona em Cloudflare Pages, Netlify e Vercel (sem build).
 
 > Tudo é simulado: pedidos, pagamentos e login ficam só no `localStorage` do navegador.
-# project-gtm
-# project-gtm
-# project-gtm
-# project-gtm

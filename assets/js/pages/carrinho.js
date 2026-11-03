@@ -14,7 +14,8 @@
     el.innerHTML =
       '<div class="layout-cart"><div class="card">' +
       lines.map(function (l) {
-        return '<div class="cart-line" data-id="' + l.id + '" data-variant="' + L.esc(l.variant) + '">' +
+        return '<div class="cart-line" data-id="' + l.id + '" data-variant="' + L.esc(l.variant) + '" data-item-name="' + L.esc(l.product.name) +
+          '" data-price="' + l.product.price + '" data-quantity="' + l.quantity + '">' +
           '<div class="product-thumb">' + l.product.emoji + '</div>' +
           '<div><a href="produto.html?id=' + l.id + '"><strong>' + L.esc(l.product.name) + '</strong></a>' +
           '<div class="small muted">' + L.esc(l.variant) + ' · ' + L.brl(l.product.price) + '</div></div>' +
@@ -40,18 +41,10 @@
     if (!b) return;
     var row = b.closest('.cart-line');
     var line = Cart.lines().find(function (l) { return l.id === row.dataset.id && l.variant === row.dataset.variant; });
-    var item = function (q) { return L.toItem(line.product, { variant: line.variant, quantity: q, list_id: line.list_id, list_name: line.list_name }); };
     var act = b.dataset.act;
-    if (act === 'plus') {
-      Cart.setQty(line.id, line.variant, line.quantity + 1);
-      L.track('add_to_cart', { ecommerce: L.ecommerce([item(1)]) });
-    } else if (act === 'minus') {
-      Cart.setQty(line.id, line.variant, line.quantity - 1);
-      L.track('remove_from_cart', { ecommerce: L.ecommerce([item(1)]) });
-    } else if (act === 'remove') {
-      Cart.setQty(line.id, line.variant, 0);
-      L.track('remove_from_cart', { ecommerce: L.ecommerce([item(line.quantity)]) });
-    }
+    if (act === 'plus') Cart.setQty(line.id, line.variant, line.quantity + 1);
+    else if (act === 'minus') Cart.setQty(line.id, line.variant, line.quantity - 1);
+    else if (act === 'remove') Cart.setQty(line.id, line.variant, 0);
     render();
   });
 
@@ -61,16 +54,13 @@
     var code = e.target.coupon.value.trim().toUpperCase();
     if (code === 'GTM10') {
       Cart.setCoupon(code);
-      L.track('coupon_applied', { coupon: code, coupon_valid: true });
       L.toast('🎉 Cupom aplicado: 10% OFF');
     } else {
       Cart.setCoupon('');
-      L.track('coupon_applied', { coupon: code, coupon_valid: false });
       L.toast('Cupom inválido');
     }
     render();
   });
 
   render();
-  if (Cart.lines().length) L.track('view_cart', { ecommerce: L.ecommerce(Cart.items()) });
 })();

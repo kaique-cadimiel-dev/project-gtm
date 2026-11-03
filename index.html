@@ -7,10 +7,10 @@
   <meta name="description" content="Loja fictícia para praticar Google Tag Manager com GA4 e Google Ads.">
   <link rel="stylesheet" href="assets/css/style.css">
   <script>window.PAGE_TYPE = 'home';</script>
-  <script src="assets/js/config.js"></script>
-  <script src="assets/js/tracking-init.js"></script>
+  <!-- GTM: cole aqui o snippet do <head> -->
 </head>
 <body>
+  <!-- GTM: cole aqui o <noscript> do <body> -->
   <div id="site-header"></div>
 
   <main class="container">
@@ -18,7 +18,7 @@
       <div>
         <span class="badge btn-accent">Promoção</span>
         <h1>Black Friday dos Dados: 10% OFF com o cupom <code>GTM10</code></h1>
-        <p>Navegue, adicione ao carrinho e finalize a compra para gerar todo o funil de ecommerce do GA4 no dataLayer.</p>
+        <p>Navegue, adicione ao carrinho e finalize a compra: o funil de ecommerce completo está pronto para você instrumentar.</p>
         <a href="produtos.html" class="btn btn-accent promo-cta" data-gtm="hero-cta">Ver produtos</a>
       </div>
       <div class="hero-emoji" aria-hidden="true">🏷️</div>
@@ -33,20 +33,19 @@
       <div class="card">
         <h2>Como usar este laboratório</h2>
         <ol>
-          <li>Abra o painel <b>📊 dataLayer</b> no canto da tela para ver cada evento.</li>
-          <li>Crie um container no GTM e ative pela página <a href="exercicios.html">Exercícios</a>.</li>
+          <li>Abra o painel <b>📊 dataLayer</b> no canto da tela: ele mostra tudo que você enviar para o <code>window.dataLayer</code>.</li>
+          <li>Crie um container no GTM e cole o snippet no <code>&lt;head&gt;</code> de cada página (procure o comentário <code>GTM</code>).</li>
           <li>Use o <b>Preview (Tag Assistant)</b> para testar tags GA4 e Google Ads.</li>
           <li>Teste campanhas com links como <a href="index.html?utm_source=google&utm_medium=cpc&utm_campaign=teste&gclid=TESTE123">?utm_source=google&amp;gclid=TESTE123</a>.</li>
         </ol>
       </div>
       <div class="card">
-        <h2>O que já está pronto</h2>
+        <h2>O que você encontra aqui</h2>
         <ul>
-          <li>Funil de ecommerce do GA4 completo (view_item_list → purchase)</li>
-          <li>Leads, cadastro, login e busca</li>
-          <li>Consent Mode v2 (default + update)</li>
-          <li><code>user_data</code> para conversões otimizadas</li>
-          <li>Captura de UTMs e gclid/gbraid/wbraid</li>
+          <li>Funil completo: lista → produto → carrinho → checkout → pedido</li>
+          <li>Formulário de lead, cadastro, login e busca interna</li>
+          <li>Banner de cookies (só interface, sem integração)</li>
+          <li>Dados do pedido e do cliente prontos no checkout</li>
           <li>Links externos, tel:, mailto:, WhatsApp, PDF e vídeo do YouTube</li>
         </ul>
       </div>
@@ -63,14 +62,14 @@
 
     <section class="section promo promo-banner" id="promo-rodape" data-promotion-id="PROMO-FRETE" data-promotion-name="Frete grátis acima de R$ 300" data-creative-name="faixa_amarela" data-creative-slot="home_rodape">
       <span style="font-size:2rem" aria-hidden="true">🚚</span>
-      <div><strong>Frete grátis acima de R$ 300</strong><br><span class="small muted">Banner usado para praticar visibilidade de elemento e select_promotion.</span></div>
+      <div><strong>Frete grátis acima de R$ 300</strong><br><span class="small muted">Banner usado para praticar visibilidade de elemento e cliques em promoção.</span></div>
       <span class="spacer"></span>
       <a href="produtos.html" class="btn btn-sm promo-cta" data-gtm="promo-frete-cta">Aproveitar</a>
     </section>
 
     <section class="section card" id="newsletter">
       <h2>Newsletter</h2>
-      <p class="muted">Gera o evento personalizado <code>newsletter_signup</code>.</p>
+      <p class="muted">Formulário simples para praticar um evento personalizado.</p>
       <form class="row" id="newsletter-form">
         <input type="email" name="email" placeholder="seu@email.com" required style="max-width:320px">
         <button class="btn" type="submit" data-gtm="newsletter-submit">Assinar</button>

@@ -26,20 +26,16 @@
     document.getElementById('login-form').addEventListener('submit', function (e) {
       e.preventDefault();
       var email = this.email.value.trim().toLowerCase();
-      var name = email.split('@')[0].replace(/[._-]+/g, ' ');
-      name = name.replace(/\b\w/g, function (c) { return c.toUpperCase(); });
-      var u = { id: userId(email), name: name, email: email, phone: '' };
-      L.User.set(u);
-      L.track('login', { method: 'email', user_id: u.id, user_data: L.userData(u) });
+      var name = email.split('@')[0].replace(/[._-]+/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase(); });
+      L.User.set({ id: userId(email), name: name, email: email, phone: '' });
       location.reload();
     });
 
     document.getElementById('signup-form').addEventListener('submit', function (e) {
       e.preventDefault();
-      var u = { name: this.name.value.trim(), email: this.email.value.trim().toLowerCase(), phone: this.phone.value.trim() };
+      var u = { name: this.elements.name.value.trim(), email: this.email.value.trim().toLowerCase(), phone: this.phone.value.trim() };
       u.id = userId(u.email);
       L.User.set(u);
-      L.track('sign_up', { method: 'email', user_id: u.id, user_data: L.userData(u) });
       location.reload();
     });
   }
@@ -50,10 +46,8 @@
       '<div class="card"><h2 style="margin-top:0">Olá, ' + L.esc(u.name) + '!</h2>' +
       '<p class="muted">' + L.esc(u.email) + ' · ID: <code>' + L.esc(u.id) + '</code></p>' +
       '<p>Pedidos feitos neste navegador: <strong>' + orders.length + '</strong></p>' +
-      '<p class="small muted">Com o login, <code>user_logged_in</code> e <code>user_id</code> passam a ser enviados em <code>page_data</code>.</p>' +
       '<button class="btn btn-outline" id="logout" data-gtm="logout">Sair</button></div>';
     document.getElementById('logout').onclick = function () {
-      L.track('logout', { user_id: u.id });
       L.User.logout();
       location.reload();
     };

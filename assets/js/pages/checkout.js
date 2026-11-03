@@ -15,7 +15,7 @@
   // Preenche com dados do usuário logado
   var user = L.User.get();
   if (user) {
-    shippingForm.name.value = user.name || '';
+    shippingForm.elements.name.value = user.name || '';
     shippingForm.email.value = user.email || '';
     shippingForm.phone.value = user.phone || '';
   }
@@ -46,12 +46,6 @@
       '<div class="summary-row summary-total"><span>Total</span><span>' + L.brl(t.total) + '</span></div>';
   }
 
-  function ecommerceParams(extra) {
-    var coupon = Cart.coupon();
-    return L.ecommerce(Cart.items(), L.clean(Object.assign({ coupon: coupon || undefined }, extra)));
-  }
-
-  L.track('begin_checkout', { ecommerce: ecommerceParams() });
   renderSummary();
   shippingForm.addEventListener('change', renderSummary);
 
@@ -59,11 +53,10 @@
     e.preventDefault();
     var f = shippingForm;
     customer = {
-      name: f.name.value.trim(), email: f.email.value.trim(), phone: f.phone.value.trim(),
+      name: f.elements.name.value.trim(), email: f.email.value.trim(), phone: f.phone.value.trim(),
       street: f.street.value.trim(), city: f.city.value.trim(), region: f.region.value.trim().toUpperCase(),
       postal_code: f.postal_code.value.trim()
     };
-    L.track('add_shipping_info', { ecommerce: ecommerceParams({ shipping_tier: shipping().tier }) });
     shippingForm.hidden = true;
     paymentForm.hidden = false;
     document.getElementById('step-1').className = 'step done';
@@ -95,15 +88,13 @@
       discount: t.discount,
       total: t.total,
       items: Cart.items(),
-      customer: customer,
-      new_customer: !orders.some(function (o) { return o.email === customer.email; }),
-      tracked: false
+      customer: customer
     };
     orders.push({ transaction_id: order.transaction_id, email: customer.email, value: order.value });
     L.LS.set('gtmlab_orders', orders);
     L.SS.set('gtmlab_last_order', order);
     Cart.clear();
     this.querySelector('#place-order').disabled = true;
-    L.trackThenGo('add_payment_info', { ecommerce: L.ecommerce(order.items, L.clean({ coupon: order.coupon, payment_type: payment })) }, 'obrigado.html');
+    location.href = 'obrigado.html';
   });
 })();

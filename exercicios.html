@@ -6,43 +6,42 @@
   <title>Exercícios | GTM Lab Store</title>
   <link rel="stylesheet" href="assets/css/style.css">
   <script>window.PAGE_TYPE = 'exercises';</script>
-  <script src="assets/js/config.js"></script>
-  <script src="assets/js/tracking-init.js"></script>
+  <!-- GTM: cole aqui o snippet do <head> -->
 </head>
 <body>
+  <!-- GTM: cole aqui o <noscript> do <body> -->
   <div id="site-header"></div>
 
   <main class="container">
-    <h1>Exercícios e referência</h1>
+    <h1>Exercícios e plano de medição</h1>
 
-    <section class="card" id="gtm-setup">
-      <h2 style="margin-top:0">1. Ativar o GTM</h2>
-      <p class="muted">Cole o ID do seu container. Ele fica salvo neste navegador (não precisa publicar o site de novo). Para deixar fixo, edite <code>GTM_ID</code> em <code>assets/js/config.js</code>.</p>
-      <form class="row" id="gtm-form">
-        <input id="gtm-id" placeholder="GTM-XXXXXXX" style="max-width:240px" pattern="GTM-[A-Za-z0-9]+" required>
-        <button class="btn" type="submit">Salvar e recarregar</button>
-        <button class="btn btn-outline" type="button" id="gtm-clear">Remover</button>
-      </form>
-      <p id="gtm-status" class="small"></p>
+    <section class="card">
+      <h2 style="margin-top:0">Como começar</h2>
+      <ol>
+        <li>Crie um container <b>Web</b> no GTM e cole o snippet no <code>&lt;head&gt;</code> e o <code>&lt;noscript&gt;</code> no <code>&lt;body&gt;</code> das 9 páginas (há um comentário <code>GTM</code> marcando cada lugar).</li>
+        <li>Implemente os <code>dataLayer.push()</code> nos arquivos de <code>assets/js/pages/</code>, seguindo o plano de medição abaixo.</li>
+        <li>Valide com o <b>📊 dataLayer</b> (canto da tela), o Preview do GTM (Tag Assistant) e o DebugView do GA4.</li>
+        <li>Elementos já têm <code>id</code>, <code>class</code> e atributos <code>data-*</code> (ex.: <code>data-item-id</code>, <code>data-price</code>, <code>data-gtm</code>) para praticar seletores e variáveis de DOM.</li>
+      </ol>
     </section>
 
     <section class="section">
-      <div class="row"><h2 style="margin:0">2. Checklist de prática</h2><span class="spacer"></span><span id="progress-label" class="small muted"></span></div>
+      <div class="row"><h2 style="margin:0">Checklist de prática</h2><span class="spacer"></span><span id="progress-label" class="small muted"></span></div>
       <div class="progress" style="margin:10px 0 6px"><div id="progress-bar" style="width:0"></div></div>
       <div class="card" id="exercises"></div>
     </section>
 
     <section class="section">
-      <h2>3. Referência do dataLayer</h2>
-      <p class="muted">Eventos que o site já envia. Use como base para acionadores e variáveis de camada de dados.</p>
+      <h2>Plano de medição sugerido</h2>
+      <p class="muted">Eventos e parâmetros sugeridos (nomenclatura do GA4). Você decide o que implementar e como.</p>
       <div class="table-wrap"><table>
-        <thead><tr><th>Evento</th><th>Onde</th><th>Dados principais</th></tr></thead>
+        <thead><tr><th>Evento</th><th>Página</th><th>Quando disparar</th><th>Parâmetros sugeridos</th></tr></thead>
         <tbody id="events"></tbody>
       </table></div>
     </section>
 
     <section class="section">
-      <h2>4. Links de teste</h2>
+      <h2>Links de teste</h2>
       <ul>
         <li><a href="index.html?utm_source=google&utm_medium=cpc&utm_campaign=black_friday&utm_term=tag+manager&gclid=TESTE_GCLID_123">Campanha Google Ads (utm + gclid)</a></li>
         <li><a href="index.html?utm_source=newsletter&utm_medium=email&utm_campaign=lancamento">Campanha e-mail</a></li>

@@ -1,11 +1,12 @@
 /**
- * Núcleo do site: helpers, carrinho, cabeçalho/rodapé, banner de consentimento,
- * painel de debug do dataLayer. Exposto em window.Lab.
+ * Núcleo do site: carrinho, usuário, cabeçalho/rodapé, banner de cookies e
+ * painel que mostra o window.dataLayer. Exposto em window.Lab.
+ *
+ * Nada aqui envia dados de rastreamento: isso é com você.
  */
 (function () {
   'use strict';
-  var cfg = window.SITE_CONFIG || {};
-  var CURRENCY = cfg.CURRENCY || 'BRL';
+  var CURRENCY = 'BRL';
 
   function store(s) {
     return {
@@ -23,52 +24,6 @@
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function getProduct(id) { return window.PRODUCTS.find(function (p) { return p.id === id; }); }
 
-  function clean(o) {
-    Object.keys(o).forEach(function (k) { if (o[k] === undefined || o[k] === null || o[k] === '') delete o[k]; });
-    return o;
-  }
-
-  /** Converte um produto no formato de item do GA4. */
-  function toItem(p, o) {
-    o = o || {};
-    return clean({
-      item_id: p.id,
-      item_name: p.name,
-      item_brand: p.brand,
-      item_category: p.category,
-      item_category2: p.category2,
-      item_variant: o.variant,
-      price: p.price,
-      quantity: o.quantity || 1,
-      index: o.index,
-      item_list_id: o.list_id,
-      item_list_name: o.list_name,
-      coupon: o.coupon,
-      discount: o.discount
-    });
-  }
-
-  /** Push no dataLayer. Limpa o objeto ecommerce antes (boa prática do GA4). */
-  function track(event, params) {
-    var obj = Object.assign({ event: event }, params || {});
-    if (obj.ecommerce) window.dataLayer.push({ ecommerce: null });
-    window.dataLayer.push(obj);
-    return obj;
-  }
-
-  /** Push + navegação, usando eventCallback do GTM (com fallback sem GTM). */
-  function trackThenGo(event, params, url) {
-    var done = false;
-    function go() { if (!done) { done = true; location.href = url; } }
-    track(event, Object.assign({}, params, { eventCallback: go, eventTimeout: 2000 }));
-    setTimeout(go, window.GTM_ACTIVE_ID ? 2200 : 300);
-  }
-
-  function ecommerce(items, extra) {
-    var value = round(items.reduce(function (s, i) { return s + i.price * i.quantity - (i.discount || 0) * i.quantity; }, 0));
-    return Object.assign({ currency: CURRENCY, value: value }, extra || {}, { items: items });
-  }
-
   // --- Usuário ---------------------------------------------------------------
   var User = {
     get: function () { return LS.get('gtmlab_user', null); },
@@ -76,38 +31,15 @@
     logout: function () { LS.del('gtmlab_user'); }
   };
 
-  function phoneE164(phone) {
-    var d = String(phone || '').replace(/\D/g, '');
-    if (!d) return undefined;
-    if (d.indexOf('55') !== 0 || d.length <= 11) d = '55' + d;
-    return '+' + d;
-  }
-
-  /** Objeto user_data para conversões otimizadas (Enhanced Conversions). */
-  function userData(d) {
-    var parts = String(d.name || '').trim().split(/\s+/);
-    var ud = clean({ email: (d.email || '').trim().toLowerCase(), phone_number: phoneE164(d.phone) });
-    var addr = clean({
-      first_name: parts[0] ? parts[0].toLowerCase() : undefined,
-      last_name: parts.length > 1 ? parts.slice(1).join(' ').toLowerCase() : undefined,
-      street: d.street, city: d.city, region: d.region,
-      postal_code: d.postal_code ? String(d.postal_code).replace(/\D/g, '') : undefined,
-      country: d.street || d.city ? 'BR' : undefined
-    });
-    if (Object.keys(addr).length) ud.address = addr;
-    return ud;
-  }
-
   // --- Carrinho --------------------------------------------------------------
   var Cart = {
     raw: function () { return LS.get('gtmlab_cart', []); },
     save: function (lines) { LS.set('gtmlab_cart', lines); renderCartCount(); },
     find: function (lines, id, variant) { return lines.find(function (l) { return l.id === id && l.variant === variant; }); },
-    add: function (id, variant, qty, list) {
+    add: function (id, variant, qty) {
       var lines = this.raw();
       var line = this.find(lines, id, variant);
-      if (line) line.quantity += qty;
-      else lines.push(clean({ id: id, variant: variant, quantity: qty, list_id: list && list.id, list_name: list && list.name }));
+      if (line) line.quantity += qty; else lines.push({ id: id, variant: variant, quantity: qty });
       this.save(lines);
     },
     setQty: function (id, variant, qty) {
@@ -126,29 +58,24 @@
     coupon: function () { return LS.get('gtmlab_coupon', ''); },
     setCoupon: function (c) { if (c) LS.set('gtmlab_coupon', c); else LS.del('gtmlab_coupon'); },
     discountRate: function () { return this.coupon() === 'GTM10' ? 0.1 : 0; },
+    /** Linhas do carrinho em formato simples, usado para montar o pedido. */
     items: function () {
-      var coupon = this.coupon(), rate = this.discountRate();
       return this.lines().map(function (l) {
-        return toItem(l.product, {
-          variant: l.variant, quantity: l.quantity, list_id: l.list_id, list_name: l.list_name,
-          coupon: rate ? coupon : undefined, discount: rate ? round(l.product.price * rate) : undefined
-        });
+        return { id: l.product.id, name: l.product.name, brand: l.product.brand, category: l.product.category, variant: l.variant, price: l.product.price, quantity: l.quantity };
       });
     },
     clear: function () { this.save([]); this.setCoupon(''); }
   };
 
-  function addToCart(product, variant, qty, list) {
-    Cart.add(product.id, variant, qty, list);
-    track('add_to_cart', {
-      ecommerce: ecommerce([toItem(product, { variant: variant, quantity: qty, list_id: list && list.id, list_name: list && list.name })])
-    });
+  function addToCart(product, variant, qty) {
+    Cart.add(product.id, variant, qty);
     toast('🛒 ' + product.name + ' adicionado ao carrinho');
   }
 
-  // --- Listas de produto -----------------------------------------------------
+  // --- Lista de produtos -----------------------------------------------------
   function productCard(p, i) {
-    return '<article class="card product-card" data-item-id="' + p.id + '" data-index="' + i + '">' +
+    return '<article class="card product-card" data-item-id="' + p.id + '" data-item-name="' + esc(p.name) + '" data-item-brand="' + esc(p.brand) +
+      '" data-item-category="' + esc(p.category) + '" data-price="' + p.price + '" data-index="' + i + '">' +
       '<a class="card-link" href="produto.html?id=' + p.id + '">' +
       '<div class="product-thumb">' + p.emoji + '</div>' +
       '<div class="product-info"><span class="muted small">' + esc(p.category) + '</span>' +
@@ -157,30 +84,13 @@
       '</article>';
   }
 
-  /** Renderiza um grid, dispara view_item_list e trata select_item / add_to_cart. */
-  function renderProductGrid(el, products, list) {
+  function renderProductGrid(el, products) {
     el.innerHTML = products.length ? products.map(productCard).join('') : '<p class="muted">Nenhum produto encontrado.</p>';
-    if (!products.length) return;
-    track('view_item_list', {
-      ecommerce: { item_list_id: list.id, item_list_name: list.name, items: products.map(function (p, i) { return toItem(p, { index: i, list_id: list.id, list_name: list.name }); }) }
-    });
     el.onclick = function (e) {
-      var card = e.target.closest('.product-card');
-      if (!card) return;
-      var p = getProduct(card.dataset.itemId);
-      var index = Number(card.dataset.index);
-      if (e.target.closest('.btn-quick-add')) {
-        addToCart(p, p.variants[0], 1, list);
-        return;
-      }
-      var link = e.target.closest('.card-link');
-      if (link && !e.metaKey && !e.ctrlKey) {
-        e.preventDefault();
-        SS.set('gtmlab_selected', { item_id: p.id, list_id: list.id, list_name: list.name, index: index });
-        trackThenGo('select_item', {
-          ecommerce: { item_list_id: list.id, item_list_name: list.name, items: [toItem(p, { index: index, list_id: list.id, list_name: list.name })] }
-        }, link.href);
-      }
+      var btn = e.target.closest('.btn-quick-add');
+      if (!btn) return;
+      var p = getProduct(btn.dataset.itemId);
+      addToCart(p, p.variants[0], 1);
     };
   }
 
@@ -232,13 +142,10 @@
   function renderFooter() {
     var el = document.getElementById('site-footer');
     if (!el) return;
-    var gtm = window.GTM_ACTIVE_ID
-      ? '<span class="badge badge-ok">GTM ativo: ' + esc(window.GTM_ACTIVE_ID) + '</span>'
-      : '<span class="badge badge-off">GTM não configurado</span>';
     el.innerHTML = '<footer class="site-footer"><div class="container footer-inner">' +
-      '<div><strong>GTM Lab Store</strong><p class="muted small">Loja fictícia para praticar Google Tag Manager, GA4 e Google Ads.</p>' + gtm + '</div>' +
+      '<div><strong>GTM Lab Store</strong><p class="muted small">Loja fictícia para praticar Google Tag Manager, GA4 e Google Ads.</p></div>' +
       '<div><strong>Links</strong><ul class="plain">' +
-      '<li><a href="exercicios.html">Exercícios e referência de eventos</a></li>' +
+      '<li><a href="exercicios.html">Exercícios e plano de medição</a></li>' +
       '<li><a href="https://support.google.com/tagmanager" target="_blank" rel="noopener" data-gtm="outbound-footer">Ajuda do GTM ↗</a></li>' +
       '<li><a href="#" id="open-consent">Preferências de cookies</a></li></ul></div>' +
       '<div><strong>Atendimento</strong><ul class="plain">' +
@@ -248,12 +155,9 @@
     document.getElementById('open-consent').onclick = function (e) { e.preventDefault(); openConsent(true); };
   }
 
-  // --- Consentimento ---------------------------------------------------------
+  // --- Banner de cookies (só interface: guarda a escolha no localStorage) ---
   function saveConsent(c) {
-    c = { analytics: !!c.analytics, ads: !!c.ads, updated_at: new Date().toISOString() };
-    LS.set('gtmlab_consent', c);
-    window.gtag('consent', 'update', window.consentToGtag(c));
-    track('consent_update', { consent_analytics: c.analytics, consent_ads: c.ads });
+    LS.set('gtmlab_consent', { analytics: !!c.analytics, ads: !!c.ads, updated_at: new Date().toISOString() });
     var b = document.getElementById('consent-banner');
     if (b) b.remove();
   }
@@ -269,12 +173,11 @@
     b.setAttribute('aria-label', 'Consentimento de cookies');
     b.innerHTML =
       '<div class="consent-inner"><div><strong>🍪 Usamos cookies</strong>' +
-      '<p class="small">Usamos cookies de análise (Google Analytics) e de publicidade (Google Ads). ' +
-      'Este banner envia comandos do <b>Consent Mode v2</b> para o dataLayer.</p>' +
+      '<p class="small">Usamos cookies de análise e de publicidade. Escolha o que deseja permitir.</p>' +
       '<div class="consent-details"' + (details ? '' : ' hidden') + '>' +
       '<label><input type="checkbox" checked disabled> Necessários</label>' +
-      '<label><input type="checkbox" id="c-analytics"' + (c.analytics ? ' checked' : '') + '> Análise (analytics_storage)</label>' +
-      '<label><input type="checkbox" id="c-ads"' + (c.ads ? ' checked' : '') + '> Publicidade (ad_storage, ad_user_data, ad_personalization)</label></div></div>' +
+      '<label><input type="checkbox" id="c-analytics"' + (c.analytics ? ' checked' : '') + '> Análise</label>' +
+      '<label><input type="checkbox" id="c-ads"' + (c.ads ? ' checked' : '') + '> Publicidade</label></div></div>' +
       '<div class="consent-actions">' +
       '<button class="btn btn-outline btn-sm" data-c="reject">Rejeitar</button>' +
       '<button class="btn btn-outline btn-sm" data-c="custom">' + (details ? 'Salvar escolhas' : 'Personalizar') + '</button>' +
@@ -292,14 +195,12 @@
     };
   }
 
-  // --- Painel de debug do dataLayer -----------------------------------------
+  // --- Painel que mostra o window.dataLayer (somente leitura) ----------------
   function safeJson(v) {
     var seen = new WeakSet();
     return JSON.stringify(v, function (k, val) {
       if (typeof val === 'function') return '[função]';
-      if (typeof Element !== 'undefined' && val instanceof Element) {
-        return '<' + val.tagName.toLowerCase() + (val.id ? '#' + val.id : '') + (val.className && typeof val.className === 'string' ? '.' + val.className.trim().split(/\s+/).join('.') : '') + '>';
-      }
+      if (typeof Element !== 'undefined' && val instanceof Element) return '<' + val.tagName.toLowerCase() + (val.id ? '#' + val.id : '') + '>';
       if (val && typeof val === 'object') {
         if (seen.has(val)) return '[circular]';
         seen.add(val);
@@ -317,11 +218,10 @@
   }
 
   function debugPanel() {
-    if (!cfg.DEBUG_PANEL) return;
     var open = LS.get('gtmlab_debug_open', false);
     var wrap = document.createElement('div');
-    wrap.className = 'dl-debug' + (open ? ' open' : '');
-    wrap.innerHTML = '<button class="dl-toggle" type="button" title="Mostrar pushes do dataLayer">📊 dataLayer <span class="dl-count">0</span></button>' +
+    wrap.className = 'dl-debug hide-gtm' + (open ? ' open' : '');
+    wrap.innerHTML = '<button class="dl-toggle" type="button" title="Mostrar o conteúdo do dataLayer">📊 dataLayer <span class="dl-count">0</span></button>' +
       '<div class="dl-panel"><div class="dl-head"><strong>dataLayer</strong><span class="muted small">mais recente primeiro</span>' +
       '<label class="small"><input type="checkbox" class="dl-hide-gtm" checked> ocultar gtm.*</label></div><ol class="dl-list"></ol></div>';
     document.body.appendChild(wrap);
@@ -332,10 +232,9 @@
       open = !open; wrap.classList.toggle('open', open); LS.set('gtmlab_debug_open', open);
     };
     hideGtm.onchange = function () { wrap.classList.toggle('hide-gtm', hideGtm.checked); };
-    wrap.classList.add('hide-gtm');
     var seen = 0;
     function poll() {
-      var dl = window.dataLayer;
+      var dl = window.dataLayer || [];
       for (; seen < dl.length; seen++) {
         var e = dl[seen];
         var label = entryLabel(e);
@@ -360,10 +259,9 @@
   }
 
   window.Lab = {
-    LS: LS, SS: SS, CURRENCY: CURRENCY, brl: brl, round: round, param: param, esc: esc, clean: clean,
-    getProduct: getProduct, toItem: toItem, track: track, trackThenGo: trackThenGo, ecommerce: ecommerce,
-    Cart: Cart, addToCart: addToCart, renderProductGrid: renderProductGrid, renderHeader: renderHeader,
-    User: User, userData: userData, phoneE164: phoneE164, toast: toast, saveConsent: saveConsent, openConsent: openConsent
+    LS: LS, SS: SS, CURRENCY: CURRENCY, brl: brl, round: round, param: param, esc: esc,
+    getProduct: getProduct, Cart: Cart, addToCart: addToCart, renderProductGrid: renderProductGrid,
+    User: User, toast: toast, openConsent: openConsent
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();

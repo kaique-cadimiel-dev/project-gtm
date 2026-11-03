@@ -1,56 +1,43 @@
 (function () {
   var L = window.Lab;
 
-  // --- Ativação do GTM -------------------------------------------------------
-  var status = document.getElementById('gtm-status');
-  status.innerHTML = window.GTM_ACTIVE_ID
-    ? '<span class="badge badge-ok">Ativo: ' + L.esc(window.GTM_ACTIVE_ID) + '</span>'
-    : '<span class="badge badge-off">Nenhum container configurado</span>';
-
-  document.getElementById('gtm-form').addEventListener('submit', function (e) {
-    e.preventDefault();
-    var id = document.getElementById('gtm-id').value.trim().toUpperCase();
-    if (!/^GTM-[A-Z0-9]+$/.test(id)) return;
-    location.href = location.pathname + '?gtm_id=' + encodeURIComponent(id);
-  });
-  document.getElementById('gtm-clear').onclick = function () {
-    location.href = location.pathname + '?gtm_id=clear';
-  };
-
   // --- Checklist -------------------------------------------------------------
   var EXERCISES = [
-    ['Fundamentos', [
-      ['Criar container e instalar', 'Crie um container Web no GTM e ative o ID acima. Confirme no Preview que "Container Loaded" aparece.'],
-      ['Tag de configuração do GA4', 'Crie a tag Google Tag com seu Measurement ID no acionador "Initialization - All Pages". Valide no DebugView do GA4.'],
-      ['Variáveis de camada de dados', 'Crie variáveis DLV para <code>page_type</code>, <code>user_id</code> e <code>user_logged_in</code> e envie como parâmetros/propriedades de usuário.'],
-      ['Acionador de evento personalizado', 'Crie um acionador para o evento <code>newsletter_signup</code> (home) e dispare uma tag de evento GA4.']
+    ['Instalação e dataLayer', [
+      ['Instalar o GTM', 'Cole o snippet nas 9 páginas e confirme "Container Loaded" no Preview.'],
+      ['Contexto da página', 'Faça um push inicial (antes do GTM) com <code>page_type</code> (use <code>window.PAGE_TYPE</code>) e se o usuário está logado.'],
+      ['Tag base do GA4', 'Crie a tag Google Tag com seu Measurement ID e valide no DebugView.'],
+      ['Variáveis de camada de dados', 'Crie variáveis para os parâmetros que você enviar e use-as em tags de evento GA4.'],
+      ['Evento personalizado', 'Implemente um evento para o formulário de newsletter (home) e dispare uma tag de evento GA4.']
     ]],
     ['Ecommerce GA4', [
-      ['Ler o objeto ecommerce', 'Dispare uma tag de evento GA4 para <code>view_item</code> usando "Enviar dados de ecommerce → Camada de dados".'],
-      ['Funil completo', 'Cubra view_item_list, select_item, view_item, add_to_cart, view_cart, begin_checkout, add_shipping_info, add_payment_info e purchase. Veja o relatório de Compras no GA4.'],
-      ['Um evento só para vários', 'Crie uma única tag com acionador regex <code>^(add_to_cart|remove_from_cart|view_item)$</code> usando o nome do evento como <code>{{Event}}</code>.'],
-      ['Deduplicação do purchase', 'Clique em "Reenviar purchase" em Obrigado e confirme no GA4 que o <code>transaction_id</code> duplicado não gera duas compras.']
+      ['Itens e lista', 'Envie <code>view_item_list</code> e <code>select_item</code> (home, produtos) com a lista de origem.'],
+      ['Produto e carrinho', 'Envie <code>view_item</code>, <code>add_to_cart</code>, <code>remove_from_cart</code> e <code>view_cart</code>.'],
+      ['Checkout', 'Envie <code>begin_checkout</code>, <code>add_shipping_info</code> e <code>add_payment_info</code>.'],
+      ['Compra', 'Envie <code>purchase</code> com <code>transaction_id</code>, <code>value</code>, <code>tax</code>, <code>shipping</code>, <code>coupon</code> e <code>items</code>.'],
+      ['Deduplicação do purchase', 'Recarregue a página de pedido e garanta que o <code>purchase</code> não seja enviado duas vezes.'],
+      ['Um acionador para vários eventos', 'Use um acionador com regex (ex.: <code>^(add_to_cart|remove_from_cart)$</code>) e <code>{{Event}}</code> como nome do evento.']
     ]],
     ['Google Ads', [
-      ['Conversão de compra', 'Crie a tag "Acompanhamento de conversões do Google Ads" no <code>purchase</code> com <code>value</code>, moeda e <code>transaction_id</code> dinâmicos.'],
-      ['Conversão de lead', 'Dispare uma conversão no <code>generate_lead</code> (Contato) usando <code>value</code> do dataLayer.'],
-      ['Vinculador de conversões', 'Adicione a tag Vinculador de conversões em All Pages e teste com o link de campanha com <code>gclid</code>.'],
-      ['Conversões otimizadas', 'Ative nas configurações da tag e use "Dados fornecidos pelo usuário" lendo a variável <code>user_data</code> do <code>purchase</code> ou <code>generate_lead</code>.'],
-      ['Remarketing dinâmico', 'Dispare a tag de remarketing com <code>items</code> do ecommerce em view_item, add_to_cart e purchase.']
+      ['Conversão de compra', 'Crie a tag de conversão no <code>purchase</code> com valor, moeda e <code>transaction_id</code> dinâmicos.'],
+      ['Conversão de lead', 'Implemente um evento de lead no formulário de Contato e crie a conversão correspondente.'],
+      ['Vinculador de conversões', 'Adicione a tag em All Pages e teste com o link de campanha com <code>gclid</code>.'],
+      ['Conversões otimizadas', 'Envie dados do cliente (e-mail, telefone, endereço) no <code>purchase</code> e configure "Dados fornecidos pelo usuário".'],
+      ['Remarketing dinâmico', 'Dispare a tag de remarketing com os itens em view_item, add_to_cart e purchase.']
     ]],
     ['Gatilhos avançados', [
       ['Profundidade de rolagem', 'Dispare em 25/50/75/90% na home (texto longo propositalmente).'],
       ['Visibilidade de elemento', 'Dispare quando o banner <code>#promo-rodape</code> ficar 50% visível por 1s.'],
       ['Cliques em links', 'Crie acionadores para <code>tel:</code>, <code>mailto:</code>, WhatsApp, link externo e download de PDF na página Contato.'],
-      ['Clique em elemento com data-attribute', 'Use o atributo <code>data-gtm</code> dos botões (ex.: <code>add-to-cart</code>) como condição de acionador.'],
-      ['Envio de formulário', 'Compare o acionador nativo "Envio de formulário" com o evento <code>generate_lead</code> e explique qual é mais confiável.'],
+      ['Clique por data-attribute', 'Use o atributo <code>data-gtm</code> dos botões como condição de acionador.'],
+      ['Envio de formulário', 'Compare o acionador nativo "Envio de formulário" com um evento seu e explique qual é mais confiável.'],
       ['Vídeo do YouTube', 'Use o acionador de vídeo (início, 25/50/75%, fim) na página Contato.'],
-      ['Visualização de página do histórico', 'Em Produtos, os filtros usam <code>history.replaceState</code>. Teste o acionador "Alteração no histórico".']
+      ['Alteração no histórico', 'Em Produtos, os filtros usam <code>history.replaceState</code>. Teste o acionador "Alteração no histórico".']
     ]],
-    ['Qualidade e privacidade', [
-      ['Consent Mode v2', 'Ative "Verificações de consentimento integradas" nas tags Google. Veja no Preview o estado do consentimento antes e depois do banner.'],
-      ['Tags de terceiros com consentimento', 'Exija <code>analytics_storage</code> ou <code>ad_storage</code> em tags não Google (ex.: HTML personalizado).'],
-      ['Atribuição', 'Capture UTMs da variável <code>attribution</code> e confira a origem/mídia no GA4.'],
+    ['Privacidade e qualidade', [
+      ['Consent Mode v2', 'Defina o consentimento padrão antes do GTM e atualize quando o usuário escolher no banner de cookies.'],
+      ['Tags de terceiros com consentimento', 'Exija <code>analytics_storage</code> ou <code>ad_storage</code> em tags não Google.'],
+      ['Atribuição', 'Capture UTMs e <code>gclid</code> da URL e confira a origem/mídia no GA4.'],
       ['Ambientes e versões', 'Crie um ambiente de teste, publique versões e pratique o rollback.'],
       ['Tag Assistant e DebugView', 'Valide cada exercício com Preview + DebugView e anote divergências.']
     ]]
@@ -85,30 +72,26 @@
   });
   progress();
 
-  // --- Referência de eventos ----------------------------------------------
+  // --- Plano de medição ------------------------------------------------------
   var EVENTS = [
-    ['page_data', 'Todas (antes do GTM)', 'page_type, user_logged_in, user_id, consent_*, attribution'],
-    ['consent_update', 'Banner de cookies', 'consent_analytics, consent_ads'],
-    ['view_promotion / select_promotion', 'Home', 'promotion_id, promotion_name, creative_name, creative_slot'],
-    ['view_item_list', 'Home, Produtos, Produto', 'item_list_id, item_list_name, items[]'],
-    ['select_item', 'Cards de produto', 'item_list_*, items[]'],
-    ['view_item', 'Produto', 'currency, value, items[]'],
-    ['add_to_cart / remove_from_cart', 'Cards, Produto, Carrinho', 'currency, value, items[]'],
-    ['add_to_wishlist, share, select_variant', 'Produto', 'items[] / item_id, method'],
-    ['search / search_no_results', 'Produtos (?q=)', 'search_term'],
-    ['filter_category, sort_products', 'Produtos', 'filter_value, sort_by'],
-    ['view_cart', 'Carrinho', 'currency, value, items[]'],
-    ['coupon_applied', 'Carrinho', 'coupon, coupon_valid'],
-    ['begin_checkout', 'Checkout', 'currency, value, coupon, items[]'],
-    ['add_shipping_info', 'Checkout', 'shipping_tier, items[]'],
-    ['add_payment_info', 'Checkout', 'payment_type, items[]'],
-    ['purchase', 'Obrigado', 'transaction_id, value, tax, shipping, coupon, items[], new_customer, user_data'],
-    ['generate_lead, form_start', 'Contato', 'value, currency, lead_subject, user_data'],
-    ['newsletter_signup', 'Home', 'form_id, user_data'],
-    ['sign_up / login / logout', 'Conta', 'method, user_id, user_data'],
-    ['reveal_phone', 'Contato', 'location']
+    ['page_data (contexto)', 'Todas', 'Antes do snippet do GTM', 'page_type, user_logged_in, user_id'],
+    ['consent_update', 'Todas', 'Usuário escolhe no banner de cookies', 'consent_analytics, consent_ads'],
+    ['view_promotion / select_promotion', 'Home', 'Banner visível / clique no CTA', 'promotion_id, promotion_name, creative_name, creative_slot'],
+    ['view_item_list', 'Home, Produtos, Produto', 'Lista renderizada', 'item_list_id, item_list_name, items[]'],
+    ['select_item', 'Home, Produtos, Produto', 'Clique em um card', 'item_list_*, items[]'],
+    ['view_item', 'Produto', 'Página carregada', 'currency, value, items[]'],
+    ['add_to_cart / remove_from_cart', 'Cards, Produto, Carrinho', 'Adicionar / remover', 'currency, value, items[]'],
+    ['add_to_wishlist, share', 'Produto', 'Clique no botão', 'items[] / method, content_type'],
+    ['search', 'Produtos (?q=)', 'Busca com termo', 'search_term'],
+    ['view_cart', 'Carrinho', 'Página carregada com itens', 'currency, value, items[]'],
+    ['begin_checkout', 'Checkout', 'Página carregada', 'currency, value, coupon, items[]'],
+    ['add_shipping_info', 'Checkout', 'Envio da etapa de entrega', 'shipping_tier, items[]'],
+    ['add_payment_info', 'Checkout', 'Pedido finalizado (etapa de pagamento)', 'payment_type, items[]'],
+    ['purchase', 'Obrigado', 'Uma vez por pedido', 'transaction_id, value, tax, shipping, coupon, items[]'],
+    ['generate_lead', 'Contato', 'Envio do formulário', 'value, currency, form_id'],
+    ['sign_up / login / logout', 'Conta', 'Envio do formulário / clique em sair', 'method, user_id']
   ];
   document.getElementById('events').innerHTML = EVENTS.map(function (r) {
-    return '<tr><td><code>' + L.esc(r[0]) + '</code></td><td>' + L.esc(r[1]) + '</td><td class="small">' + L.esc(r[2]) + '</td></tr>';
+    return '<tr><td><code>' + L.esc(r[0]) + '</code></td><td>' + L.esc(r[1]) + '</td><td class="small">' + L.esc(r[2]) + '</td><td class="small">' + L.esc(r[3]) + '</td></tr>';
   }).join('');
 })();
