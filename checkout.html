@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Checkout | GTM Lab Store</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script>window.PAGE_TYPE = 'checkout';</script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/tracking-init.js"></script>
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <main class="container">
+    <h1>Checkout</h1>
+    <div class="steps"><span class="step active" id="step-1">1. Entrega</span><span class="step" id="step-2">2. Pagamento</span><span class="step">3. Confirmação</span></div>
+    <p class="alert alert-warn small">Ambiente simulado: use dados fictícios. Nenhum pagamento é processado.</p>
+
+    <div class="layout-cart" id="checkout">
+      <div>
+        <form class="card form" id="shipping-form" autocomplete="on">
+          <h2 style="margin:0">Dados de entrega</h2>
+          <div class="form-row">
+            <label>Nome completo<input name="name" id="checkout-name" required autocomplete="name" placeholder="Maria Silva"></label>
+            <label>E-mail<input name="email" id="checkout-email" type="email" required autocomplete="email" placeholder="maria@exemplo.com"></label>
+          </div>
+          <div class="form-row">
+            <label>Telefone<input name="phone" id="checkout-phone" type="tel" required autocomplete="tel" placeholder="(11) 98765-4321"></label>
+            <label>CEP<input name="postal_code" id="checkout-cep" required autocomplete="postal-code" placeholder="01310-100"></label>
+          </div>
+          <label>Endereço<input name="street" id="checkout-street" required autocomplete="street-address" placeholder="Av. Paulista, 1000"></label>
+          <div class="form-row">
+            <label>Cidade<input name="city" id="checkout-city" required autocomplete="address-level2" placeholder="São Paulo"></label>
+            <label>Estado<input name="region" id="checkout-region" required autocomplete="address-level1" placeholder="SP" maxlength="2"></label>
+          </div>
+          <fieldset style="border:0;padding:0;margin:0" class="form">
+            <legend style="font-weight:600;margin-bottom:6px">Frete</legend>
+            <label class="choice"><input type="radio" name="shipping_tier" value="PAC" data-price="15" checked> PAC — R$ 15,00 (7 dias)</label>
+            <label class="choice"><input type="radio" name="shipping_tier" value="SEDEX" data-price="30"> SEDEX — R$ 30,00 (2 dias)</label>
+            <label class="choice"><input type="radio" name="shipping_tier" value="Retirada" data-price="0"> Retirar na loja — grátis</label>
+          </fieldset>
+          <button class="btn" type="submit" data-gtm="add-shipping-info">Continuar para pagamento</button>
+        </form>
+
+        <form class="card form" id="payment-form" hidden>
+          <h2 style="margin:0">Pagamento</h2>
+          <label class="choice"><input type="radio" name="payment_type" value="Cartão de crédito" checked> 💳 Cartão de crédito</label>
+          <label class="choice"><input type="radio" name="payment_type" value="Pix"> ⚡ Pix</label>
+          <label class="choice"><input type="radio" name="payment_type" value="Boleto"> 🧾 Boleto</label>
+          <div class="row">
+            <button class="btn btn-outline" type="button" id="back-shipping">Voltar</button>
+            <button class="btn btn-accent" type="submit" id="place-order" data-gtm="place-order">Finalizar pedido</button>
+          </div>
+        </form>
+      </div>
+
+      <aside class="card summary" id="summary"></aside>
+    </div>
+  </main>
+
+  <div id="site-footer"></div>
+  <script src="assets/js/products.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/pages/checkout.js"></script>
+</body>
+</html>

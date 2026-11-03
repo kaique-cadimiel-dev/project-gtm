@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contato | GTM Lab Store</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script>window.PAGE_TYPE = 'contact';</script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/tracking-init.js"></script>
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <main class="container">
+    <h1>Fale com a gente</h1>
+    <p class="muted">Página para praticar conversões de lead e gatilhos de clique, formulário, vídeo e rolagem.</p>
+
+    <div class="grid grid-2">
+      <form class="card form" id="lead-form" name="lead-form" action="#" method="post">
+        <h2 style="margin:0">Solicite um orçamento</h2>
+        <label>Nome<input name="name" id="lead-name" required autocomplete="name"></label>
+        <div class="form-row">
+          <label>E-mail<input name="email" id="lead-email" type="email" required autocomplete="email"></label>
+          <label>Telefone<input name="phone" id="lead-phone" type="tel" autocomplete="tel" placeholder="(11) 98765-4321"></label>
+        </div>
+        <label>Assunto
+          <select name="subject" id="lead-subject" required>
+            <option value="">Selecione…</option>
+            <option value="orcamento">Orçamento corporativo</option>
+            <option value="suporte">Suporte</option>
+            <option value="parceria">Parceria</option>
+          </select>
+        </label>
+        <label>Mensagem<textarea name="message" id="lead-message" rows="4"></textarea></label>
+        <label class="row" style="font-weight:400"><input type="checkbox" name="optin" id="lead-optin"> Aceito receber comunicações por e-mail</label>
+        <button class="btn" type="submit" id="lead-submit" data-gtm="lead-submit">Enviar</button>
+        <div id="lead-success" class="alert" hidden>✅ Mensagem enviada (simulação). Evento <code>generate_lead</code> enviado.</div>
+      </form>
+
+      <div class="card">
+        <h2 style="margin-top:0">Outros canais</h2>
+        <p class="muted small">Cada link abaixo é um alvo comum de tag de clique / conversão.</p>
+        <ul class="plain">
+          <li>📞 <a href="tel:+5511999999999" id="link-tel" data-gtm="tel">Ligar: (11) 99999-9999</a></li>
+          <li>💬 <a href="https://wa.me/5511999999999?text=Ol%C3%A1" target="_blank" rel="noopener" id="link-whatsapp" data-gtm="whatsapp">WhatsApp</a></li>
+          <li>✉️ <a href="mailto:contato@gtmlab.example" id="link-email" data-gtm="mailto">contato@gtmlab.example</a></li>
+          <li>📄 <a href="assets/files/catalogo-gtm-lab.pdf" download id="link-pdf" data-gtm="download">Baixar catálogo (PDF)</a></li>
+          <li>🔗 <a href="https://developers.google.com/tag-platform/tag-manager" target="_blank" rel="noopener" id="link-outbound" data-gtm="outbound">Documentação do GTM (link externo)</a></li>
+        </ul>
+        <button class="btn btn-outline btn-sm" id="reveal-phone" data-gtm="reveal-phone">Mostrar telefone do comercial</button>
+        <p id="phone-hidden" hidden><strong>(11) 98888-7777</strong></p>
+      </div>
+    </div>
+
+    <section class="section">
+      <h2>Vídeo</h2>
+      <p class="muted small">Embed do YouTube com <code>enablejsapi=1</code>, compatível com o acionador "Vídeo do YouTube" do GTM.</p>
+      <div style="aspect-ratio:16/9;max-width:720px">
+        <iframe id="yt-video" width="100%" height="100%" style="border:0;border-radius:12px"
+          src="https://www.youtube.com/embed/KRvbFpeZ11Y?enablejsapi=1"
+          title="Vídeo sobre Google Tag Manager" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+    </section>
+
+    <section class="section" id="faq">
+      <h2>Perguntas frequentes</h2>
+      <details class="faq" data-gtm="faq"><summary>Qual o prazo de entrega?</summary><p>De 2 a 7 dias úteis, conforme a modalidade de frete.</p></details>
+      <details class="faq" data-gtm="faq"><summary>Posso trocar um produto?</summary><p>Sim, em até 30 dias após o recebimento.</p></details>
+      <details class="faq" data-gtm="faq"><summary>Quais formas de pagamento?</summary><p>Cartão de crédito, Pix e boleto (todos simulados).</p></details>
+      <details class="faq" data-gtm="faq"><summary>Vocês emitem nota fiscal?</summary><p>Esta é uma loja fictícia, então não. 😉</p></details>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+  <script src="assets/js/products.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/pages/contato.js"></script>
+</body>
+</html>

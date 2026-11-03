@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Produtos | GTM Lab Store</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script>window.PAGE_TYPE = 'product_list';</script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/tracking-init.js"></script>
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <main class="container">
+    <h1 id="list-title">Todos os produtos</h1>
+    <div class="row" style="margin-bottom:20px">
+      <div class="chips" id="categories"></div>
+      <span class="spacer"></span>
+      <label class="row small">Ordenar
+        <select id="sort" style="width:auto">
+          <option value="relevancia">Relevância</option>
+          <option value="menor">Menor preço</option>
+          <option value="maior">Maior preço</option>
+        </select>
+      </label>
+    </div>
+    <div class="grid products" id="product-grid"></div>
+  </main>
+
+  <div id="site-footer"></div>
+  <script src="assets/js/products.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/pages/produtos.js"></script>
+</body>
+</html>

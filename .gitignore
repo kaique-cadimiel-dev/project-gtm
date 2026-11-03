@@ -1,0 +1,19 @@
+# macOS
+.DS_Store
+
+# Editores / IDEs
+.idea/
+.vscode/
+*.swp
+
+# Node (caso use npx serve ou ferramentas locais)
+node_modules/
+npm-debug.log*
+
+# Logs e variáveis locais
+*.log
+.env
+.env.*
+
+# Claude Code (configuração local)
+.claude/
